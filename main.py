@@ -66,15 +66,19 @@ def down_music(url, info_dict):
 
 
 def main():
-    keyword = input('输入歌名/歌手，回车后查询：').strip()
-    html_str = get_search_result(keyword)
-    urls = get_urls(html_str)
-    url_info_dict = get_music_info(urls)
-    show_music_list(url_info_dict)
+    while True:
+        keyword = input('输入歌名/歌手，回车后查询：').strip()
+        html_str = get_search_result(keyword)
+        urls = get_urls(html_str)
+        url_info_dict = get_music_info(urls)
+        show_music_list(url_info_dict)
 
-    number = int(input('输入歌曲编号，回车后下载歌曲：').strip())
-    select_url, select_info_dict = list(url_info_dict.items())[number - 1]
-    down_music(select_url, select_info_dict)
+        while True:
+            number = int(input('输入歌曲编号，回车后下载歌曲（输入0返回搜索栏）：').strip())
+            if number == 0:
+                break
+            select_url, select_info_dict = list(url_info_dict.items())[number - 1]
+            down_music(select_url, select_info_dict)
 
 
 if __name__ == '__main__':
