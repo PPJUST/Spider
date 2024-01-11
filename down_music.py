@@ -32,6 +32,10 @@ class DownMusic:
         """测试运行是否出错"""
         return self._is_error
 
+    def get_music_name(self):
+        """获取歌曲名称"""
+        return self._music_name
+
     def _down_music(self):
         """下载歌曲"""
         filename = self._music_name + '.mp3'

@@ -1,6 +1,5 @@
 # 主程序
 import re
-import time
 
 from lxml import html
 from tqdm import tqdm
@@ -40,7 +39,6 @@ def get_music_info(urls: list):
         spider = MusicInfo(url)
         info_dict = spider.get_info()
         url_info_dict[url] = info_dict
-        time.sleep(0.2)
 
     return url_info_dict
 
@@ -52,17 +50,24 @@ def show_music_list(url_info_dict: dict):
         print(index, music_name)
 
 
-def down_music(url, info_dict):
-    """下载歌曲"""
+def down_music(url, info_dict, retry_time=0):
+    """
+    下载歌曲
+    :param retry_time: 重试次数，用于判断是否终止递归
+    """
+    if retry_time > 3:
+        print('下载失败，已跳过')
+        return
     spider = DownMusic(info_dict)
+    music_name = spider.get_music_name()
     # 检查是否正确下载，如果错误则重新获取链接
     if spider.is_error():
-        print('下载链接已失效，尝试重新获取')
+        print(f'{music_name} 下载链接已失效，尝试重新获取')
         re_spider = MusicInfo(url)
         re_info_dict = re_spider.get_info()
-        return down_music(url, re_info_dict)
+        return down_music(url, re_info_dict, retry_time + 1)
     else:
-        print('完成下载')
+        print(f'{music_name} 完成下载')
 
 
 def main():
@@ -74,11 +79,15 @@ def main():
         show_music_list(url_info_dict)
 
         while True:
-            number = int(input('输入歌曲编号，回车后下载歌曲（输入0返回搜索栏）：').strip())
-            if number == 0:
+            number = input('输入歌曲编号，回车后下载歌曲（输入0返回搜索栏，输入all下载全部）：').strip()
+            if number == '0':
                 break
-            select_url, select_info_dict = list(url_info_dict.items())[number - 1]
-            down_music(select_url, select_info_dict)
+            elif number == 'all':
+                for select_url, select_info_dict in url_info_dict.items():
+                    down_music(select_url, select_info_dict)
+            else:
+                select_url, select_info_dict = list(url_info_dict.items())[int(number) - 1]
+                down_music(select_url, select_info_dict)
 
 
 if __name__ == '__main__':
