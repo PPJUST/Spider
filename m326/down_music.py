@@ -12,8 +12,8 @@ class DownMusic:
     def __init__(self, info_dict: dict):
         self._music_download_link = info_dict['music_download_link']
         self._cover_download_link = info_dict['cover_download_link']
-        self.lrc_text_split = info_dict['lrc_text_split']
-        self._music_name = info_dict['music_name']
+        self._lrc_text_split = info_dict['lrc_text_split']
+        self._music_name = self._get_no_dup_filename(info_dict['music_name'])
 
         if self._music_download_link:  # 如果没有获取到歌曲链接，则不进行下一步
             result = self._down_music()  # 歌曲链接有有效期，过期后无法下载文件
@@ -28,6 +28,22 @@ class DownMusic:
                 self._is_error = True
         else:
             self._is_error = True
+
+    @staticmethod
+    def _get_no_dup_filename(filename):
+        listdir = [i.lower() for i in os.listdir()]
+        new_filename = filename
+        add_suffix = ' -New'
+        file_suffix = '.mp3'
+        index = 1
+
+        if f'{filename.lower()}{file_suffix}' in listdir:
+            new_filename = filename + add_suffix + str(index)
+            while f'{new_filename.lower()}{file_suffix}' in listdir:
+                index += 1
+                new_filename = filename + add_suffix + str(index)
+
+        return new_filename
 
     def is_error(self):
         """测试运行是否出错"""
